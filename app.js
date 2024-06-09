@@ -1,29 +1,34 @@
 document.addEventListener('DOMContentLoaded', function () {
-  // Ubicación inicial de Aguascalientes
-  const map = L.map('map').setView([21.8853, -102.2916], 13);
+    // Ubicación inicial de Aguascalientes
+    const map = L.map('map').setView([21.8853, -102.2916], 13);
+  
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(map);
+    // Variable para almacenar los marcadores
+    const markersLayer = L.layerGroup().addTo(map);
+  
+    fetch('https://ruta-gps-server.onrender.com/api/coordinates')
+      .then(response => response.json())
+      .then(data => {
+        // Verificar si data es un array
+        if (Array.isArray(data)) {
+          // Almacenar las coordenadas en un array
+          const coordinatesArray = data.map(coord => [coord.latitude, coord.longitude]);
+          
+          // Agregar los marcadores al mapa
+          coordinatesArray.forEach(coord => {
+            L.marker(coord).addTo(markersLayer);
+          });
 
-  // Variable para almacenar los marcadores
-  const markersLayer = L.layerGroup().addTo(map);
-
-  fetch('https://ruta-gps-server.onrender.com/api/coordinates')
-    .then(response => response.json())
-    .then(data => {
-      // Almacenar las coordenadas en un array
-      const coordinatesArray = data.map(coord => [coord.latitude, coord.longitude]);
-      
-      // Agregar los marcadores al mapa
-      coordinatesArray.forEach(coord => {
-        L.marker(coord).addTo(markersLayer);
-      });
-
-      // Agregar la polilínea al mapa
-      L.polyline(coordinatesArray, { color: 'red' }).addTo(map);
-    })
-    .catch(error => console.error('Error fetching coordinates:', error));
+          // Agregar la polilínea al mapa
+          L.polyline(coordinatesArray, { color: 'red' }).addTo(map);
+        } else {
+          throw new Error('Los datos no están en el formato esperado.');
+        }
+      })
+      .catch(error => console.error('Error fetching coordinates:', error));
 
   // Agregar un evento de clic al mapa
   map.on('click', function(e) {

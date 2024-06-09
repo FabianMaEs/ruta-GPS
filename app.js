@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Variable para almacenar los marcadores
   const markersLayer = L.layerGroup().addTo(map);
 
-  fetch('/api/coordinates')
+  fetch('https://ruta-gps-server.onrender.com/api/coordinates')
     .then(response => response.json())
     .then(data => {
       // Almacenar las coordenadas en un array

@@ -3,9 +3,31 @@ body {
     text-align: center;
   }
   
-  #map {
-    height: 500px;
-    width: 100%;
-    margin: 20px auto;
-  }
-  
+#map {
+  height: 650px;
+  width: 100%;
+  margin: 20px auto;
+}
+
+h1 {
+  margin: 20px;
+}
+
+#showRouteButton {
+  margin: 10px;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#deleteRouteButton {
+  margin: 10px;
+  padding: 10px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+

@@ -6,22 +6,13 @@ document.addEventListener('DOMContentLoaded', function () {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
 
-  // Variable para almacenar los marcadores
-  const markersLayer = L.layerGroup().addTo(map);
-
+  // Si el api tiene coordenadas, dibujar la ruta
   fetch('https://ruta-gps-server.onrender.com/api/coordinates')
     .then(response => response.json())
     .then(data => {
-      // Almacenar las coordenadas en un array
-      const coordinatesArray = data.map(coord => [coord.latitude, coord.longitude]);
-      
-      // Agregar los marcadores al mapa
-      coordinatesArray.forEach(coord => {
-        L.marker(coord).addTo(markersLayer);
-      });
-
-      // Agregar la polilínea al mapa
-      L.polyline(coordinatesArray, { color: 'red' }).addTo(map);
+      if (data.length > 0) {
+        dibujarRuta(map);
+      }
     })
     .catch(error => console.error('Error fetching coordinates:', error));
 
@@ -41,7 +32,8 @@ document.addEventListener('DOMContentLoaded', function () {
     })
     .then(response => {
       if (response.ok) {
-        alert('Coordenadas enviadas exitosamente al servidor.');
+        console.log('Coordenadas enviadas exitosamente al servidor.');
+        dibujarRuta(map);
       } else {
         throw new Error('Error al enviar las coordenadas al servidor.');
       }
@@ -55,8 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Agregar un evento de clic al botón para mostrar la ruta
   const showRouteButton = document.getElementById('showRouteButton');
   showRouteButton.addEventListener('click', function() {
-    // Aquí puedes agregar la lógica para mostrar la ruta
-    alert('Mostrando ruta...');
+    dibujarRuta(map);
   });
 
   // Agregar un evento de clic al botón para limpiar las coordenadas
@@ -79,3 +70,24 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   });
 });
+
+function dibujarRuta(map) {
+  // Variable para almacenar los marcadores
+  const markersLayer = L.layerGroup().addTo(map);
+
+  fetch('https://ruta-gps-server.onrender.com/api/coordinates')
+    .then(response => response.json())
+    .then(data => {
+      // Almacenar las coordenadas en un array
+      const coordinatesArray = data.map(coord => [coord.latitude, coord.longitude]);
+      
+      // Agregar los marcadores al mapa
+      coordinatesArray.forEach(coord => {
+        L.marker(coord).addTo(markersLayer);
+      });
+
+      // Agregar la polilínea al mapa
+      L.polyline(coordinatesArray, { color: 'red' }).addTo(map);
+    })
+    .catch(error => console.error('Error fetching coordinates:', error));
+}

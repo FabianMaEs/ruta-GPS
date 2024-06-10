@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
-  // Ubicación inicial de Aguascalientes
-  const map = L.map('map').setView([21.8853, -102.2916], 13);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(map);
+    // Ubicación inicial de Aguascalientes
+    const map = L.map('map').setView([21.8853, -102.2916], 13);
+  
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
 
   // Si el api tiene coordenadas, dibujar la ruta
   fetch('https://ruta-gps-server.onrender.com/api/coordinates')

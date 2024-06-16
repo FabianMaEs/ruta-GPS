@@ -4,13 +4,27 @@ body {
   }
   
 #map {
-  height: 650px;
+  height: 600px;
   width: 100%;
   margin: 20px auto;
 }
 
 h1 {
   margin: 20px;
+}
+
+#loading {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  background-color: white;
+  padding: 10px;
+  border: 1px solid black;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 #showRouteButton {

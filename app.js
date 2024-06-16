@@ -1,36 +1,78 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Ubicación inicial de Aguascalientes
-    const map = L.map('map').setView([21.8853, -102.2916], 13);
-  
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+  const loadingIndicator = document.getElementById('loading');
+  const API = 'https://ruta-gps-server.onrender.com/api/coordinates';
 
-  // Si el api tiene coordenadas, dibujar la ruta
-  fetch('https://ruta-gps-server.onrender.com/api/coordinates')
-    .then(response => response.json())
+  function showLoading() {
+    loadingIndicator.style.display = 'block';
+  }
+
+  function hideLoading() {
+    loadingIndicator.style.display = 'none';
+  }
+
+  const map = L.map('map').setView([21.8853, -102.2916], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  let markersLayer = L.layerGroup().addTo(map);
+
+  function dibujarRuta(map) {
+    markersLayer.clearLayers();
+
+    fetch(API)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch coordinates');
+        }
+        return response.json();
+      })
+      .then(data => {
+        const coordinatesArray = data.map(coord => [coord.latitude, coord.longitude]);
+        coordinatesArray.forEach(coord => {
+          L.marker(coord).addTo(markersLayer);
+        });
+        L.polyline(coordinatesArray, { color: 'red' }).addTo(map);
+      })
+      .catch(error => {
+        console.error('Error fetching coordinates:', error);
+        alert('Error al obtener las coordenadas del servidor.');
+      })
+      .finally(() => hideLoading()); // Asegura que hideLoading se ejecute siempre
+  }
+
+  showLoading();
+  fetch(API)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('No hay coordenadas disponibles o el servidor está apagado');
+      }
+      return response.json();
+    })
     .then(data => {
+      hideLoading();
       if (data.length > 0) {
         dibujarRuta(map);
       }
     })
-    .catch(error => console.error('Error fetching coordinates:', error));
+    .catch(error => {
+      hideLoading();
+      console.error('Error fetching coordinates:', error);
+    });
 
-  // Agregar un evento de clic al mapa
   map.on('click', function(e) {
-    // Obtener las coordenadas del clic
-    const latitude = e.latlng.lat;
-    const longitude = e.latlng.lng;
-
-    // Enviar las coordenadas al servidor
-    fetch('https://ruta-gps-server.onrender.com/api/coordinates', {
+    const { lat, lng } = e.latlng;
+    showLoading();
+    fetch(API, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ latitude, longitude }),
+      body: JSON.stringify({ latitude: lat, longitude: lng }),
     })
     .then(response => {
+      hideLoading();
       if (response.ok) {
         console.log('Coordenadas enviadas exitosamente al servidor.');
         dibujarRuta(map);
@@ -39,55 +81,37 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     })
     .catch(error => {
+      hideLoading();
       console.error('Error:', error);
       alert('Ocurrió un error al enviar las coordenadas al servidor.');
     });
   });
 
-  // Agregar un evento de clic al botón para mostrar la ruta
   const showRouteButton = document.getElementById('showRouteButton');
   showRouteButton.addEventListener('click', function() {
+    showLoading();
     dibujarRuta(map);
   });
 
-  // Agregar un evento de clic al botón para limpiar las coordenadas
   const deleteRouteButton = document.getElementById('deleteRouteButton');
   deleteRouteButton.addEventListener('click', function() {
-      // Enviar una petición DELETE al servidor
-      fetch('https://ruta-gps-server.onrender.com/api/coordinates', {
-          method: 'DELETE',
-      })
-      .then(response => {
-          if (response.ok) {
-              alert('Coordenadas eliminadas exitosamente del servidor.');
-          } else {
-              throw new Error('Error al eliminar las coordenadas del servidor.');
-          }
-      })
-      .catch(error => {
-          console.error('Error:', error);
-          alert('Ocurrió un error al eliminar las coordenadas del servidor.');
-      });
+    showLoading();
+    fetch(API, {
+      method: 'DELETE',
+    })
+    .then(response => {
+      hideLoading();
+      if (response.ok) {
+        alert('Coordenadas eliminadas exitosamente del servidor.');
+        window.location.reload();
+      } else {
+        throw new Error('Error al eliminar las coordenadas del servidor.');
+      }
+    })
+    .catch(error => {
+      hideLoading();
+      console.error('Error:', error);
+      alert('Ocurrió un error al eliminar las coordenadas del servidor.');
+    });
   });
 });
-
-function dibujarRuta(map) {
-  // Variable para almacenar los marcadores
-  const markersLayer = L.layerGroup().addTo(map);
-
-  fetch('https://ruta-gps-server.onrender.com/api/coordinates')
-    .then(response => response.json())
-    .then(data => {
-      // Almacenar las coordenadas en un array
-      const coordinatesArray = data.map(coord => [coord.latitude, coord.longitude]);
-      
-      // Agregar los marcadores al mapa
-      coordinatesArray.forEach(coord => {
-        L.marker(coord).addTo(markersLayer);
-      });
-
-      // Agregar la polilínea al mapa
-      L.polyline(coordinatesArray, { color: 'red' }).addTo(map);
-    })
-    .catch(error => console.error('Error fetching coordinates:', error));
-}

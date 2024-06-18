@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
   const loadingIndicator = document.getElementById('loading');
-  const API = 'https://ruta-gps-server.onrender.com/api/coordinates';
-
+  //const API = 'https://ruta-gps-server.onrender.com/api/coordinates';
+  //const API = 'http://localhost:3000/api/coordinates'; // Para desarrollo local
+  const API = 'https://proyecto-electronica-34053442d1e0.herokuapp.com/api/coordinates';
   function showLoading() {
     loadingIndicator.style.display = 'block';
   }
@@ -22,24 +23,26 @@ document.addEventListener('DOMContentLoaded', function () {
     markersLayer.clearLayers();
 
     fetch(API)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch coordinates');
-        }
-        return response.json();
-      })
-      .then(data => {
-        const coordinatesArray = data.map(coord => [coord.latitude, coord.longitude]);
-        coordinatesArray.forEach(coord => {
-          L.marker(coord).addTo(markersLayer);
-        });
-        L.polyline(coordinatesArray, { color: 'red' }).addTo(map);
-      })
-      .catch(error => {
-        console.error('Error fetching coordinates:', error);
-        alert('Error al obtener las coordenadas del servidor.');
-      })
-      .finally(() => hideLoading()); // Asegura que hideLoading se ejecute siempre
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch coordinates');
+      }
+      return response.json();
+    })
+    .then(data => {
+      const coordinatesArray = data.map(coord => [coord.latitude, coord.longitude, coord.timestamp]);
+      coordinatesArray.forEach(coord => {
+        const [latitude, longitude, timestamp] = coord;
+        const marker = L.marker([latitude, longitude]).addTo(markersLayer);
+        marker.bindPopup(`[Manual]: ${timestamp}`).openPopup();
+      });
+      L.polyline(coordinatesArray.map(coord => [coord[0], coord[1]]), { color: 'red' }).addTo(map);
+    })
+    .catch(error => {
+      console.error('Error fetching coordinates:', error);
+      alert('Error al obtener las coordenadas del servidor.');
+    })
+    .finally(() => hideLoading()); // Asegura que hideLoading se ejecute siempre
   }
 
   showLoading();

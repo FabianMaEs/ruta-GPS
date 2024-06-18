@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
   const loadingIndicator = document.getElementById('loading');
-  const API = 'https://ruta-gps-server.onrender.com/api/coordinates';
+  const API = 'https://proyecto-electronica-34053442d1e0.herokuapp.com/api/coordinates';
 
   function showLoading() {
     loadingIndicator.style.display = 'block';

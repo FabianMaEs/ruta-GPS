@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
       coordinatesArray.forEach(coord => {
         const [latitude, longitude, timestamp] = coord;
         const marker = L.marker([latitude, longitude]).addTo(markersLayer);
-        marker.bindPopup(`[Manual]: ${timestamp}`).openPopup();
+        marker.bindPopup(`[Horario]: ${timestamp}`).openPopup();
       });
       L.polyline(coordinatesArray.map(coord => [coord[0], coord[1]]), { color: 'red' }).addTo(map);
     })
